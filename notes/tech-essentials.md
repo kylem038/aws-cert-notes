@@ -105,3 +105,56 @@ Best practices include:
 
 
 ## Module 2: AWS Compute
+
+### Compute as a Service
+Three fundamental compute options are VMs, container services and serverless. 
+
+### Getting started
+Amazon Machine Image is the start for EC2. You will choose what OS to run and what applications to preinstall on that instance. Other options are launch permissions and block device mapping. Default is Linux. 
+
+The instance size and type can be changed on the fly. You should right size the resource so you don't over provision. 
+
+When creating an EC2 you must define:
+- Hardware specifications: CPU, memory, network, and storage
+- Logical configurations: Networking location, firewall rules, authentication, and the operating system of your choice
+
+AMI is the "recipe" used to create the EC2 instance. 
+
+Where to find AMIs includes:
+- Quick Start AMIs
+- AWS Marketplace AMIs
+- My AMIs
+- Community AMIs
+- Custom Image
+
+An instance family such as "c5n.xlarge" contains the instance family (c) for compute, generation (5), attributes (n) for NVMe storage and the size (xlarge). 
+
+Families include:
+- General purpose: balanced and good for web servers or code repos
+- Compute optimized: cpu bound apps like batch processing, media transcoding, scientific modeling, gaming services, ML, etc. 
+- Memory optimized: memory bound apps like finance, speech recognition, fluid dynamics, etc. 
+- Accelerated computing: hardware acceleration and co-processors for things that require graphics computation, floating point calculations & pattern matching
+- Storage optimized: optimized for high read / write access to large data sets. Good for data warehousing, Elasticsearch & in-memory dbs 
+- HPC optimimzed: high performance computing good for large simulation workloads. 
+
+### EC2 Instance lifecycle
+1. Pending
+2. Running (start getting charged)
+3. Reboot
+4. Stopping
+5. Stopped
+6. Stop-Hibernate (like locking yoru computer)
+7. Shutting-down
+8. Terminated (gets rid of it forever) (better back things up before doing this)
+
+Usually you want to replace an instance before terminating one. 
+
+Pricing includes:
+- On-Demand instances (no up front cost - only charged in running / stopping state)
+- Spot Instances (flexible start and end times) useful for apps that are only feasible at low compute prices or with users with fault-tolerant / stateless workloads. You set the limit for how much to pay per instance hour.
+- Saving plans are low usage prices for 1-3 year commitments. Good for steady usage, different instance types across different locations & those that have the money for the 1-3 year agreement. 
+- Reserved instances saves up to 75% compared to on-demand. Can pay upfront, partial upfront or no upfront for 1-3 years. Good for steady-state usage, or instances that will run at certain time windows. 
+- Dedicated hosts: good for compliance and hosting software licenses. 
+
+### Demo
+
