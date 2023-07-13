@@ -157,4 +157,97 @@ Pricing includes:
 - Dedicated hosts: good for compliance and hosting software licenses. 
 
 ### Demo
+Launch EC2 for launching a webapp
+1. Launch instances
+2. Select AMI
+3. Select instance type (ex. t2.xlarge)
+4. Create key pair if you want to ssh in
+5. Network setting (select VPC) and auto-assign public IP
+    a. Select security group and the type (HTTP for public access)
+    b. Add another security group for HTTPS
+6. Advanced details
+    a. Select IAM instance profile
+    b. For user data paste in user data script for deploying the instances
+    c. "stress" is a module for stress testing the app
+    d. Script should go all the way to running the app
+7. Run the instance and wait for it to get into the Running state. 
+8. Copy the public IPv4 address to see the app running. 
 
+User script
+```
+#!/bin/bash -ex
+wget https://aws-tc-largeobjects.s3-us-west-2.amazonaws.com/DEV-AWS-MO-GCNv2/FlaskApp.zip
+unzip FlaskApp.zip
+cd FlaskApp/
+yum -y install python3 mysql
+pip3 install -r requirements.txt
+amazon-linux-extras install epel
+yum -y install stress
+export PHOTOS_BUCKET=${SUB_PHOTOS_BUCKET}
+export AWS_DEFAULT_REGION=<INSERT REGION HERE>
+export DYNAMO_MODE=on
+FLASK_APP=application.py /usr/local/bin/flask run --host=0.0.0.0 --port=80
+```
+
+### Container Services
+The second item in the compute fleet (VMs, containers and serverless)
+Things like Docker or container like packages
+ECS (Elastic Container Service)
+EKS (Elastic K8s Service)
+These are orchestrastion tools for managing a lot of different containers
+Containers share the same OS and kernel as the host they exist on. VMs contain their own OS for each VM. 
+*Containers can provide speed, but virtual machines offer the full strength of an operating system and more resources, like package installation, dedicated kernel, and more.*
+
+On EC2 on instance can run many containers. ECS and EKS are there to help manage all the containers. An EC2 being managed by a container agent is called a container instance. Tasks that can be run but these agents includes:
+- Launching and stopping containers
+- Getting cluster state
+- Scaling in and out
+- Scheduling the placement of containers across your cluster
+- Assigning permissions
+- Meeting availability requirements
+
+In ECS you'd create task runners which is a simple JSON file to configure the task. 
+
+For EKS a few things differ:
+1. ECS runs on instances, EKS runs on nodes
+2. ECS has tasks. EKS has pods. 
+3. ECS runs on AWS, EKS runs on K8s. 
+
+### Intro to serverless
+Handles undifferiented heavy lifting
+Cannot access the underlying infra
+For an EC2 you'd have to run patches to update dependencies and security updates. With Serverless you wouldn't have to do that. 
+EC2 gives you a lot of control - serverless gives you convenience. 
+
+### AWS Fargate
+Container gets pushed to ECR
+Define memory and compute resources
+ECS uses Fargate with serverless options so you're not managing the EC2 instances yourself. 
+"Fargate abstracts the EC2 instance so that you’re not required to manage the underlying compute infrastructure."
+
+### Serverless with AWS Lambda
+Lambda functions only runs when an event is triggered
+Common triggers are HTTP requests, photo uploads for S3, events from a webapp, etc. 
+Max time to run a lambda is 15 mins. Only meant for short processes. 
+You want to delegate permissions to a lambda function via IAM. 
+Conifuring the trigger source includes other AWS services. 
+
+AWS SAM (Serverless Application Model)
+
+Lambda have the following:
+- Function: invoke this function when...
+- Triggers: when to invoke the function
+- Events: JSON containing the data for the function to process. 
+- App Environment: isolated runtime for the function. 
+- Deployment package: .zip or container image
+- Runtime: language used to run the application. 
+- Function handler: method used in function code to process events. 
+
+### Choosing the right compute service
+Use case: Shop has a spreadsheet that adds new inventory. Need to add that to the database when new inventory is added. Inventory is only added once per quarter. Using *Lambda* would be best so that when a new inventory is added a task can parse the spreadsheet for the new item and add that to the DB
+
+Use case: App hosted on-prem needs to be pulled into AWS. It's on Linux and no refactoring should be needed. EC2 can use Linux AMI to achieve this. Containers would require refactoring.  
+
+Use case: New app is needed using microservices design. Lower risk when changes are made to prod. Container service ECS or EKS. Containers are good for microservice designs. 
+
+## Module 3: Networking
