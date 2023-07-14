@@ -463,3 +463,113 @@ TODO find example bucket policy JSON.
 
 ## Module 5: Databases on AWS
 
+### Intro to DBs on AWS
+RDS or Relational Database Service covers relational databases
+RDBMS is a relational db management system. It covers MySQL, Postgres, Oracle, Microsoft SQL Server and Amazon Aurora. 
+It allows for:
+1. Complex SQL
+2. Reduced redundancy
+3. Familiarity
+4. Accuracy
+
+Use cases include:
+1. Apps that have a fixed schema
+2. Apps need persistent storage
+
+Can be run as managed or un-managed. In the un-managed scenario you have control over almost everything, including patching and dependency installs. AWS would take care of the OS, server, rack, power, etc. 
+With a managed DB more of the responsibility gets moved onto AWS. AWS takes care of patching and installing, backups, scaling, and availability. You would focus on app optimization including database tuning, query optimization and security. 
+
+### Amazon RDS
+Demo:
+1. Go to RDS in AWS
+2. Use Easy create
+3. AWS Aurora is useful for scaling and can be used with MySQL or Postgres. 
+4. Create the instance
+
+When creating an RDS it's similar to EC2 in that the instance is created in 1 subnet inside 1 AZ. (should have 2 for availbility concerns) Multi-AZ deployment allows for this. Failover is handled automatically. 
+
+RDS uses Elastic Block Store volumes for database and log storage. When using Aurora the data is stored in cluster volumes. 
+
+RDS can use 3 different types of storage:
+1. General Purpose SSD
+2. IOPS SSD
+3. Magnetic
+
+When creating a DB you need a VPC for it to live in, as well as subnets. You can control access further with ACLs. 
+
+Backing up data: There are 2 options
+1. Automated Backups: On by default. Backups are made during the backup window. (usually when not a peak hours). Backups live between 0-35 days. Allows for point-in-time recovery so the db can be restored from a specific point in time. 
+2. Manual snapshots: Needed to keep backups for more than 35 days. Takes snapshots but can store them however long you like. 
+
+It's recommended to use both of the above options. 
+
+Redundancy with RDS Multi-AZ:
+Gives you a primary copy in one AZ and a standby copy in another AZ. If something happens to the primary DB an automatic failover is initiatied. Once the failover happens you have 2 ways to handle setting up a new standby copy. 
+1. Demote the previous primary to the standby if it's still running
+2. Stand up a new standby db instance. 
+
+You can use IAM & security groups to manage access. RDS encryption secures the db instance and snapshots at rest. Option for SSL or TLS connections. 
+
+### Purpose Built DBs
+Pick a DB that fits your data. Do not change your data to fit the database. There are a lot of choices including:
+
+1. DynamoDB is a fully managed NoSQL database that provides fast, consistent performance at any scale. DynamoDB has become the database of choice for two categories of applications: high-scale applications and serverless applications.
+2. ElastiCache is a fully managed, in-memory caching solution. Supports Redis and Memcache
+3. MemoryDB is a Redis-compatible, durable, in-memory database service that delivers ultra-fast performance.
+4. Amazon DocumentDB is a fully managed document database from AWS. Useful for content management systems, profile management, and web and mobile applications. Supports MongoDB. 
+5. Amazon Keyspaces is a scalable, highly available, and managed Apache Cassandra compatible database service.
+6. Neptune is a fully managed graph database offered by AWS. Useful for recommendation engines, fraud detection, and knowledge graphs.
+7. Timestream is a fast, scalable, and serverless time series database service for Internet of Things (IoT) and operational applications. It is used for measuring events that change over time, such as stock prices over time or temperature measurements over time.
+8. Quantum Ledger Database is a purpose-built ledger database that provides a complete and cryptographically verifiable history of all changes made to your application data.
+
+### DynamoDB
+Serverless DB
+No tables like a RDB. It uses standalone tables. It uses items and those have attributes. Doesn't require a schema or relationships. Allows for flexible schema. Good for datasets that have variation. Scales up to 10 trillion requests per day. NOSql based. 
+
+Demo:
+1. Create a new table + select the unique id
+
+With DynamoDB, you can do the following:
+
+- Create database tables that can store and retrieve any amount of data and serve any level of request traffic. 
+- Scale up or scale down your tables' throughput capacity without downtime or performance degradation. 
+- Monitor resource usage and performance metrics using the AWS Management Console.
+
+Contains tables, which contain items, which contain attributes. 
+
+Use cases include:
+1. Developing software apps
+2. Creating media metadata stores
+3. Scaling gaming platforms
+4. Deliver retail experiences
+
+You might want to consider using DynamoDB in the following circumstances:
+- You are experiencing scalability problems with other traditional database systems.
+- You are actively engaged in developing an application or service.
+- You are working with an OLTP workload.
+- You care deploying a mission-critical application that must be highly available at all times without manual intervention.
+- You require a high level of data durability, regardless of your backup-and-restore strategy.
+
+Security:
+- Provides redundantly stored data on multiple devices across multiply regions.
+- Full encrypted at rest using keys stored in AWS Key Management Service. 
+- IAM for controlling resources. 
+- Global network security procedures. 
+
+You can track usage like:
+- Key usage telling you who made a request, actions performed, etc. 
+- Need valid IAM creds to make API requests
+- IAM policies for fine-grain control
+- Monitor operations using CloudTrail
+
+### Demo
+1. Go to EC2 and launch a running instance using "launch more like this"
+2. Make sure the instance is using auto-assign public IP
+3. Launch instance and wait for it to be Running + checks passed. Check app is still running correctly
+4. Go to DynamoDB and create a table using "id" as the primary key
+5. Use the app
+6. Check that S3 was updated with picture and check DB that entry was created. 
+
+## Module 6: Monitoring, Load balancing & Scaling
+
+### Monitoring
