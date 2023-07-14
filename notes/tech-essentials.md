@@ -335,3 +335,131 @@ By default an ACL will allow all inbound and outbound traffic.
     a. Under network setting select the new vpc and subnet 
 
 ## Module 4: Storage
+
+### Storage types
+Structured data would live in a DB. 
+Different types of storage - file, block and object. Block divvys up 1 gb and stores it in blocks. In object storage it uses the entire 1 gb as one block. Object is write once, read often. 
+1. File storage: files stored in a heirarchy. 
+2. Blocks storage: Data stored in fixed-size blocks.
+3. Object storage: stored as objects in buckets. 
+
+*File storage* is ideal when you require centralized access to files that must be easily shared and managed by multiple host computers.
+
+Use cases include:
+1. Web serving
+2. Analytics
+3. Media and entertainment
+4. Home directories
+
+*Block storage* splits files into fixed-size chunks of data called blocks that have their own addresses.
+
+Use cases include:
+1. Transactional workloads
+2. Containers
+3. VMs
+
+*Object storage* are stored in a bucket using a flat structure, meaning there are no folders, directories, or complex hierarchies.
+
+Use cases include:
+1. Data archiving
+2. Backup and recovery
+3. Rich media
+
+### File storage with EFS and FSx
+Amazon Elastic File System (Amazon EFS) is a set-and-forget file system that automatically grows and shrinks as you add and remove files.
+
+Amazon FSx is a fully managed service that offers reliability, security, scalability, and a broad set of capabilities that make it convenient and cost effective to launch, run, and scale high-performance file systems in the cloud. Can be used with Lustre, NetApp, ONTAP, OpenZFS, and Windows File Server. 
+
+### Block Storage with EC2 Instance Store and EBS
+When creating an EC2 you get an instance store from EBS. EC2 instance store is tied to the lifecycle of the EC2. If you shut the EC2 instance down the data is gone. It's ephemeral. 
+
+Instance Store
+Instance store is ideal if you host applications that replicate data to other EC2 instances, such as Hadoop clusters. It’s also ideal for temporary storage of information that changes frequently, such as buffers, caches, scratch data, and other temporary content.
+
+EBS
+Amazon Elastic Block Store (Amazon EBS) is block-level storage that you can attach to an Amazon EC2 instance. It is:
+1. Detachable: You can detach an EBS volume from one EC2 and attach it to another one in the same AZ. 
+2. Distinct: It's separated out so if the EC2 goes down your data persists. 
+3. Size-limited: There is a max amount of data that can be stored.
+4. 1-to-1 connection: no longer true techinically. You can attach EBS volumes to multiple instances now. It's called multi-attach. 
+
+Scaling EBS
+Increase the volume size or attach multiple volumes. 
+
+Use cases include:
+1. OS: boot and root volumes. AMIs are ususally EBS volumes
+2. Databases: storage layer for DBs
+3. Enterprise apps: 
+4. Big data analytics engines
+
+EBS can be either SSDs or HDDs. 
+
+Benefits include High Availbility, Data persistence, data encryption, flexibility and backups.  
+
+EBS snapshots are incremental backups that only save the blocks on the volume that have changed after your most recent snapshot.
+
+### Object storage with S3
+Storing photos is a good use case for S3. The block drive would eventually hit the size limit on EBS. S3 is not mounted onto the EC2 instance. 
+
+S3 Bucket
+Store objects into a bucket. Folders can exist within a bucket. Buckets are region specific. 
+
+Most objects will be denied access when first trying to retrieve them. You need to configure who can see the object url. You'll need an ACL and then "make public with ACL". Use IAM or S3 Bucket policies to decide who can see what content in an S3. 
+
+Similar to IAM it's JSON and lists out what actions are allowed or denied on a bucket. Cannot be used on folders or individual urls. 
+
+- Bucket names must be between 3 (min) and 63 (max) characters long.
+- Bucket names can consist only of lowercase letters, numbers, dots (.), and hyphens (-).
+- Bucket names must begin and end with a letter or number.
+- Buckets must not be formatted as an IP address.
+- A bucket name cannot be used by another AWS account in the same partition until the bucket is deleted.
+
+Object key names
+It consists of a bucket name, prefix and object key. These come together in the form of a url. 
+
+Use cases include:
+1. Backup and storage
+2. Media hosting
+3. Software delivery
+4. Data lakes
+5. Static websites
+6. Static content
+
+Security
+You should use IAM policies for private buckets in the following two scenarios:
+
+- You have many buckets with different permission requirements. Instead of defining many different S3 bucket policies, you can use IAM policies.
+- You want all policies to be in a centralized location. By using IAM policies, you can manage all policy information in one location.
+
+You should use S3 bucket policies in the following scenarios:
+
+- You need a simple way to do cross-account access to Amazon S3, without using IAM roles.
+- Your IAM policies bump up against the defined size limit. S3 bucket policies have a larger size limit.
+
+S3 allows for versioning. If you reupload the same file with the same name it will overwrite the existing file. Versioning avoids conflicting naming and allows for preservation. Enabling it provides a UUID for each object. Helps prevent accidental deletions or overwrites. 
+
+Version states include Unversioned, Versioning-enabled, Versioning-suspended. 
+
+Defining a lifecycle config - options include:
+1. Transition actions define when objects should transition to another storage class.
+2. Expiration actions define when objects expire and should be permanently deleted.
+Use cases include periodic logs or data that changes in access frequency. Good for setting rules on when to delete things after a set time. 
+
+### Demo
+Creating an S3 bucket and attaching to EC2 instance
+1. Create S3 bucket (keep defaults)
+2. Test uploading of an object (like an image)
+3. Access the bucket via the application by using permission.
+    a. Edit the bucket policy by adding the correct JSON. 
+4. Authorize EC2 to access the S3 bucket. 
+    a. Relaunch the EC2 using "Launch more like this"
+    b. Change auto-assign public IPs to enable
+    c. Advanced details > In the user data add the bucket name.
+5. 2/2 checks should be passed when instance is running. Check via IP address that app is still working. 
+
+Cloudfront can be used to deliver content of S3 using a cache
+
+TODO find example bucket policy JSON. 
+
+## Module 5: Databases on AWS
+
