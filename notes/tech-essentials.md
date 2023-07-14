@@ -251,3 +251,87 @@ Use case: App hosted on-prem needs to be pulled into AWS. It's on Linux and no r
 Use case: New app is needed using microservices design. Lower risk when changes are made to prod. Container service ECS or EKS. Containers are good for microservice designs. 
 
 ## Module 3: Networking
+
+### Intro to Networking
+Configuring the network (or VPC) allows Internet traffic to flow through the app
+Using the default VPC can be dangerous from a security perspective. 
+With networking the idea of sending a letter in the mail is much like a routing. 
+The computer equivilent is it's IP address. It's a 32-bit address in binary. 
+IPv4 notation is the decimal format converted into 8 bits separated by a period. 
+Example: 192.168.1.30
+CIDR notation is how you express a range of IPs. 
+Example: 192.168.1.30/24
+The "/24" is flexible. The higher the number after the /, the smaller number of IP addresses in the network. /28 would provide 16 IP addresses. /16 would provide 65,536 IP addresses. 
+
+### Amazon VPC
+Creating a VPC needs a Region and a IP range. 
+Demo:
+Check region to match what region your other resources are in. 
+Then create VPC. 
+Input CIDR block. 
+
+Divide the space inside the VPC into subnets. Allows for granular control of the resources. 
+An EC2 that needs internet access would be one (public) subnet, and your DB would be another (private) subnet. 
+The CIDR needs to be a subset of the overall VPC CIDR. 
+
+To enable internet connectivity you need a "Internet Gateway". 
+Attach the gateway to the VPC using the Actions. 
+
+To enable connectivity between private resources you can use a Virtual Private Gateway. 
+
+To handle availability you should duplicate the subnets in another availability zone. 4 total subnets. 
+
+A common starting place for those who are new to the cloud is to create a VPC with an IP range of /16 and create subnets with an IP range of /24.
+
+To link a connection between an on-prem data center and an AWS VPC you can use AWS Direct Connect. This allows for virtual interfaces directly to public AWS services or other VPCs. 
+
+### VPC Routing
+How do requests from users know which subnet to use? This is where route tables come into play. 
+Route tables exist within the Virtual private cloud. 
+By default you get a local target of 10.1.0.0/16
+The route table will define whether traffic can get to a public or private subnet
+For a public subnet you'd need a custom route table. Create a table, edit the routes, use 0.0.0.0/0 and associate it with the internet gateway. 
+Then edit subnet association and only select the 2 public subnets. 
+The private VPCs will not get a route table and will use the overall VPC table, which allows for local traffic only. 
+
+- You cannot delete the main route table.
+- You cannot set a gateway route table as the main route table.
+- You can replace the main route table with a custom subnet route table.
+- You can add, remove, and modify routes in the main route table.
+- You can explicitly associate a subnet with the main route table, even if it's already implicitly associated.
+
+### VPC Security
+2 options to control access you can use network ACLs and security groups. 
+You can use ACLs to only allow for HTTPs traffic and deny everything else. 
+You also need to allow for HTTPs to be inbound and outbound to allow for full functionality. 
+Every EC2 would need a security group. 
+The security group will also need HTTP and HTTPs allowed. 
+Basic starting config would be to leave ACLs as default and control traffic in the security groups. 
+
+Security groups block all inbound traffic but allow all outbound traffic by default. 
+
+ACLS secure subnets only. Security groups secure instances.
+
+By default an ACL will allow all inbound and outbound traffic. 
+
+### Demo
+1. Create VPC
+2. Set CIDR range using /16
+3. Create subnets
+4. Select VPC
+5. Create public subnet 
+    a. Use /24 for the IP
+6. Create private subnet
+    a. Use /24 
+7. Duplicate the subnets for availability. 
+    a. Use a different availability zone - same region but use something like 2b instead of 2a (uswest-2b)
+    b. Use non-overlapping CIDR ranges (10.1.1.0/24, 10.1.2.0/24, 10.1.3.0/24, 10.1.4.0/24)
+8. Create Internet gateway
+9. Attach the gateway to VPC. 
+10. Create route tables. 
+11. Add route to allow traffic from internet to internet gateway. 
+12. Associate subnet with route table
+13. Relaunch the EC2 instance (launch more like this option) to associate the EC2 with the updated VPC settings.
+    a. Under network setting select the new vpc and subnet 
+
+## Module 4: Storage
