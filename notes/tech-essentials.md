@@ -573,3 +573,180 @@ You can track usage like:
 ## Module 6: Monitoring, Load balancing & Scaling
 
 ### Monitoring
+Each datapoint is a metric
+Metrics over time are statistics
+Usually you'll see CPU utilization, NetworkIn and NetworkOut. 
+Determine a baseline and then alert when things leave the baseline. 
+
+CloudWatch montiors everything in one place. 
+
+Monitoring helps answer questions like:
+- How many people are visiting my site day to day?
+- How can I track the number of visitors over time?
+- How will I know if the website is having performance or availability issues?
+- What happens if my Amazon Elastic Compute Cloud (Amazon EC2) instance runs out of capacity?
+- Will I be alerted if my website goes down?
+
+S3 metrics look at size of objects, number of objects in a bucket, number of requests made to a bucket
+RDS metrics look at DB connections, CPU utilization and disk space consumption
+EC2 metrics look at CPU util, network util, disk performance and status checks. 
+
+Monitoring allows you to:
+1. Proactively respond to issues
+2. Improve performance and reliability
+3. Recognize security threats
+4. Make data-driven decisions
+5. Create cost-effective solutions
+
+### AWS CloudWatch
+Demo:
+1. Start with creating a dashboard
+2. Select a widget - line graph for cpu util
+3. Select service and then the CPU util 
+4. You can create custom metrics if you'd like
+5. Next look at creating alarms
+6. Create alarm and the period the alarm fires off of should be changed over time. Not too long, not too short. 
+7. 3 states for an alarm - In Alarm, OK and Insufficient data
+8. Can create alarms that send emails to alert certain users. 
+
+CloudWatch can do the following:
+- Detect anomalous behavior in your environments.
+- Set alarms to alert you when something is not right.
+- Visualize logs and metrics with the AWS Management Console.
+- Take automated actions like scaling.
+- Troubleshoot issues.
+- Discover insights to keep your applications healthy.
+
+More detailed monitoring costs $$$. 
+Custom metrics can be setup to cover things like:
+- Webpage load times
+- Request error rates
+- Number of processes or threads on your instance
+- Amount of work performed by your application
+
+Metric data can be consumed outside of AWS using the GetMetricData API.
+
+Some services provide automatic logging (like Lambda). Others like EC2 will need to be configured using CloudWatch Logs. Logs contain an Event (timestamped), Log stream (grouped logs for a instance) and Group (all the log stream of the same retention and permission settings)
+
+### Solution Optimization
+Add redundancy in multiple AZs
+Scale horizontially and not vertically. 
+Use autoscaling to scale based on conditions. 
+Use Elastic Load Balancing to handle things when the instances begin to grow. 
+
+Challenges when managing multiple AZ
+1. Replication process - manage config files, patching, etc. across all the instances. 
+2. Customer redirection - use a load balancer to avoid propagation time issues. 
+3. High availability: active-passive vs. active-active. 
+    a. Active-passive - only one instance of 2 will be available. This doesn't scale well. 
+    b. Active-active - Both instances are running and the load is spread across the 2 instances. Good for stateless applications, not good for stateful apps. (ex. customer session isn't available on both servers)
+
+### Traffic Routing with Elastic Load Balancing
+ELBs are regional services
+ELBs automatically scale based on traffic
+There's an App load balancer, Network load balancer, and gateway Load balancer. 
+ALBs are configured using a listener (port 80/443 and protocol http https), target group (EC2, Lambda, etc), and rule (how requests are routed to a target). 
+
+Demo:
+1. ELB lives in EC2
+2. Create load balancer
+3. Select type
+4. Select the VPC + AZs + security groups + subnets
+5. Security group selection
+6. Next select the Target type
+7. Select instances and create the target group
+8. Back on the other page select the newly created target group
+9. Grab the DNS ip address 
+
+Most loadbalancers use a round robin algo. 
+Client sends request from browser > request goes to load balancer > request is forwarded to EC2 instance > repsonse goes through the load balancer > back to client. 
+
+Different features includes:
+- Hybrid mode: can manage on-prem services
+- High availability: runs across multiple AZs
+- Scalability: scales to meet demand of incoming traffic. 
+
+ELBs do health checks before sending traffic. 2 different checks are:
+1. Establishing a connection to a backend EC2 instance using TCP and marking the instance as available if the connection is successful.
+2. Making an HTTP or HTTPS request to a webpage that you specify and validating that an HTTP response code is returned.
+
+One strategy for defining your own health check is to create a "/monitor" page. It will make a call to the DB to make sure it can connect. This way the health check verifies the entire app is working, rather than just getting a 200 OK from the server. 
+
+Different Load Balancers
+Application Load Balancer contains feature for: (Layer 7 OSI)
+- Routing traffic based on request data: granular routing to target groups
+- Sends responses directly to client: useful for redirects
+- TLS offloading: SSL cert must be provided by IAM or ACM
+- Authenticate users: auth before user passes through load balancer
+- Secure traffic: only support certain IP ranges
+- Support for sticky sessions: uses cookie to remember which server to send traffic to. 
+
+Network Load Balancer contains features for:
+- TCP and UDP traffic (Layer 4 OSI)
+- Sticky sessions: same client > same target
+- Low latency
+- Source IP address: Preserves client-side source IP address
+- Static IP support: static IP per AZ (subnet)
+- Elastic IP support: assign custom, fixed IP per AZ (subnet)
+- DNS Failover: Route53 to direct traffic to load balancer nodes
+
+Gateway load balancer contains features for:
+- Supporting third-party apps like firewalls, intrusion detection and prevention, deep packet inspection. 
+- High availability: only route through health virtual appliances
+- Monitoring: supports CloudWatch
+- Streamlined deployment: supports AWS marketplace
+- Private connectivity: connects via VPCs, internet gateways and other resources
+
+### EC2 Auto Scaling
+Allows for provision based on demand using CloudWatch
+Allows for horizontal scalability
+
+Demo:
+1. Create launch template
+2. Select auto-scaling option
+3. Select instance type to match the existing instance
+4. Select security group
+5. Advanced details to select IAM role
+6. Paste user data from the other template
+7. Next define autoscaling group (side panel)
+8. Use the template we just defined
+9. Select the VPC for the network and the 2 subnets
+10. Select the existing load balancer
+11. Select target group and enable the health checks. 
+12. Select minimum and max instances and desired (defaults to min)
+13. Scaling policies - where you'd use CloudWatch to determine scaling
+    a. Similar to setting up an alarm
+14. Can add notifications when a scaling event happens
+15. Stress app to see it works (load testing tool in real world)
+16. Look at CloudWatch to see if instances fire up under stress
+17. Look at target groups in the load balancing to see all the instances launched. 
+
+Vertical scaling increases resources for each instance. Steps include stopping the instance, changing the instance size or type, shifting traffic to instance and making it active, and make sure both instances match the change. 
+
+Horizontal scaling is simply adding more instances using the auto-scaling service. Features include:
+- Auto scaling
+- Schedule based scaling based on user-defined schedules
+- Fleet management: auto replace unhealthy instances
+- Predictive scaling: ML driven schedule to optimize number of instances. 
+- Purchase options
+- Integrates with ELB
+
+Launch templates define what is launched when scaling. You can create a launch template in one of three ways as follows:
+- Use an existing EC2 instance. All the settings are already defined.
+- Create one from an already existing template or a previous version of a launch template.
+- Create a template from scratch. These parameters will need to be defined: AMI ID, instance type, key pair, security group, storage, and resource tags.
+
+Don't use launch configs. 
+
+Autoscaling groups define where in EC2 the resources get deployed. Uses the VPC and subnets for this. Need at least 2 AZs. 
+
+Set a max to avoid getting charged a lot of $$$. 
+
+Scaling policies is where you can use CloudWatch to define the actions of the scaling. 3 policies are:
+- Simple Scaling Policy: Has a cooldown period to make sure you don't infinitely scale. 
+- Step Scaling Policy: Defines rules for scaling that would trigger even while scaling activity or health checks are in progress. 
+- Target Tracking Scaling Policy: Easiest one to use when using default target tracking. Creates things automatically in CloudWatch for you. 
+
+### Demo App Redesign
+
+
