@@ -127,7 +127,7 @@ Where to find AMIs includes:
 - Community AMIs
 - Custom Image
 
-An instance family such as "c5n.xlarge" contains the instance family (c) for compute, generation (5), attributes (n) for NVMe storage and the size (xlarge). 
+An instance family such as "c5n.xlarge" contains the instance family (c) for compute, generation (5), attributes (n) for network optimized and the size (xlarge). 
 
 Families include:
 - General purpose: balanced and good for web servers or code repos
